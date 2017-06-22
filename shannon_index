@@ -1,0 +1,74 @@
+#********Jensen-Shannon Divergence**********
+#class: JSD
+#input:
+#   M=[[q1,q2,q3,...],[p1,p2,p3,...],[...],...]
+#output:
+#   JS divergence matrix pairwise in M matrix
+#*******************************************
+from __future__ import division
+import os,sys
+from math import log,sqrt
+from numpy import array
+class JSD:
+	def KLD(self,p,q):
+		if 0 in q :
+			raise ValueError
+		return sum(_p * log(_p/_q) for (_p,_q) in zip(p,q) if _p!=0)
+	def JSD_core(self,p,q):
+		M = [0.5*(_p+_q) for _p,_q in zip(p,q)]
+		return sqrt(0.5*self.KLD(p,M)+0.5*self.KLD(q,M))
+'''
+def seq2vector(x):
+	mylist = []
+	mydict = {'A':1,'T':2,'G':3,'C':4}
+	for i in x:
+		ii = mydict[i.upper()]
+		mylist.append(ii)
+	return mylist
+'''
+def Matrix_jsd(M,p=1e-06,n=0):  # p -> pseudocount , n -> normalizeCount
+	"""M must be a matrix of probilities between 0 and 1, or if normalizeCounts=TRUE, a matrix of counts >=0"""
+	if n:
+		if not isinstance(M,list):
+			print Matrix_jsd.__doc__
+		if len(M)<2:
+			print "It must be two or more vectors of matrix"
+		else:
+			for i in M:
+				length = len(i)
+				if length != len(M[0]):
+					print "Vectors have different length"
+					sys.exit(0)
+				for j in i:
+					if not isinstance(j,int):
+						print "Are you sure you are trying to normalize a count matrix? It isn't integer..."
+		M_0 = []
+		for i in M:
+			M_1 = []
+			total = sum(i)
+			for j in i:
+				if j == 0:
+					j = p
+				a = j/total
+				M_1.append(a)
+			M_0.append(M_1)
+	else:
+		M_0 = M
+	mylist0 = []
+	for i in range(len(M_0)):
+		mylist1 = []
+		for j in range(len(M_0)):
+			mylist1.append(round(jsd.JSD_core(M_0[i],M_0[j]),6))
+		print mylist1
+		mylist0.append(mylist1)
+	return mylist0
+
+#********Test*******
+#w = 'AgcTat'
+#m = 'TTTCCG'
+#p = seq2vector(w)
+#q = seq2vector(m)
+
+jsd = JSD()
+M = [[2,2,3,4,3],[1,3,2,3,4],[1,1,2,2,3]]
+M_jsd = Matrix_jsd(M,n=1)
